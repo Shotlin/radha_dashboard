@@ -1,0 +1,116 @@
+/* =========================================================
+   RADHA Design Tokens — lib/design/tokens.css
+   Single source of truth for the dashboard.
+   All values mirror the mobile Visual System Bible exactly.
+   NEVER hard-code hex, spacing, or radius values in components.
+   ========================================================= */
+
+:root {
+  /* ── Brand accent ── */
+  --accent: #ea580c;
+  --accent-deep: #9a3412;
+  --accent-tint: #fed7aa;
+
+  /* ── Ink ── */
+  --ink: #1c1917;
+  --ink-soft: #57534e;
+
+  /* ── Surfaces ── */
+  --surface: #fffbf5; /* warm cream canvas — never flat white */
+  --surface-raised: #ffffff; /* cards, sheets, table surfaces */
+  --surface-sunken: #f5f1e8; /* skeletons, empty wells, image backers */
+
+  /* ── Border ── */
+  --hairline: #e7e1d4;
+
+  /* ── Semantic ── */
+  --success: #15803d;
+  --warn: #b45309;
+  --danger: #b91c1c;
+  --teal: #0f766e;
+
+  /* ── Category tints (≤12% alpha tile backings only) ── */
+  --cat-amber: #b45309; /* expiry / time-sensitive */
+  --cat-violet: #6d5bd0; /* low stock / inventory — flat muted, no gradient */
+  --cat-green: #15803d; /* GRN / received / fresh */
+  --cat-teal: #0f766e; /* store health / analytics */
+  --cat-orange: #ea580c; /* scans / audit */
+
+  /* ── Festive accent (celebratory beats only — never as CTA) ── */
+  --marigold: #f59e0b;
+  --turmeric: #facc15;
+
+  /* ── Radii ── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* ── Elevation ── */
+  --shadow-card: 0 2px 8px rgba(28, 25, 23, 0.06);
+  --shadow-card-md: 0 4px 16px rgba(28, 25, 23, 0.1);
+  --shadow-drawer: 4px 0 24px rgba(28, 25, 23, 0.12); /* mobile nav drawer side shadow */
+
+  /* ── Spacing (4pt grid) ── */
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+
+  /* ── Motion ── */
+  --motion-enter: cubic-bezier(0.23, 1, 0.32, 1);
+  --motion-exit: cubic-bezier(0.55, 0, 1, 0.45);
+  --duration-micro: 160ms;
+  --duration-panel: 280ms;
+  --duration-celebrate: 600ms;
+}
+
+/* ── Dark mode — desaturated tonal inversion, not literal ── */
+[data-theme='dark'],
+.dark {
+  --surface: #1a1714;
+  --surface-raised: #221e1a;
+  --surface-sunken: #2a2420;
+  --ink: #f5f1e8;
+  --ink-soft: #a8a29e;
+  --hairline: #3a332b;
+  --accent: #f26419; /* slightly lifted for AA contrast on dark */
+  --accent-tint: #431407;
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-card-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Typography utilities ── */
+
+/* Mono / tabular — for all numbers, EANs, dates, prices, IDs */
+.mono,
+.tabular {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Eyebrow labels — open every section */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.eyebrow-accent {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+
+/* ── Paper-grain canvas — applied once at body, never per-card ──
+   Uses an SVG noise filter as a data-URI background layer at ≤3% opacity.
+   This is declared here and applied in globals.css via the body rule. */
