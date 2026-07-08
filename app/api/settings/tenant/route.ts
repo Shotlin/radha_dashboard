@@ -5,6 +5,7 @@
  */
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/session';
+import { parseBackendError, parseBackendJson } from '@/lib/api/core/envelope';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
@@ -28,14 +29,14 @@ export async function GET(): Promise<NextResponse> {
     });
 
     if (!res.ok) {
-      const err = (await res.json().catch(() => ({}))) as { message?: string };
+      const err = parseBackendError(await res.json().catch(() => ({})));
       return NextResponse.json(
         { message: err.message ?? 'Failed to load tenant info' },
         { status: res.status },
       );
     }
 
-    const data = (await res.json()) as unknown;
+    const data = await parseBackendJson<unknown>(res);
     return NextResponse.json(data);
   } catch {
     return NextResponse.json({ message: 'Service unavailable' }, { status: 503 });

@@ -16,6 +16,7 @@ import {
   throwIfNotOk,
   withBackendTimeout,
 } from '@/lib/api/core/proxy';
+import { parseBackendJson } from '@/lib/api/core/envelope';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
@@ -56,7 +57,7 @@ export async function GET(req: NextRequest) {
             { headers: { Authorization: `Bearer ${session.accessToken}` }, signal, next: { revalidate: 0 } },
           );
           await throwIfNotOk(res);
-          return (await res.json()) as ActivityResponse;
+          return parseBackendJson<ActivityResponse>(res);
         }),
       selectDemo: selectDemoActivity,
       assertScope: noScopeAssertion,

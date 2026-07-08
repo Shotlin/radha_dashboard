@@ -22,6 +22,7 @@ import { getSession, isTokenExpiringSoon } from '@/lib/auth/session';
 import { refreshSessionOnce, endSession } from '@/lib/auth/refresh-session';
 import { isTransient, backoffSchedule } from '@/lib/auth/retry';
 import { DEMO_MODE } from '@/lib/demo/demo-session';
+import { parseBackendJson } from '@/lib/api/core/envelope';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
@@ -119,7 +120,7 @@ export async function GET() {
       );
     }
 
-    const user = await upstream.json();
+    const user = await parseBackendJson<unknown>(upstream);
     return NextResponse.json({ user }, { status: 200 });
   }
 

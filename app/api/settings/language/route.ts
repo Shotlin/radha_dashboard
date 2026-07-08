@@ -8,6 +8,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/session';
+import { parseBackendError, parseBackendJson } from '@/lib/api/core/envelope';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
@@ -33,14 +34,14 @@ export async function GET(): Promise<NextResponse> {
       if (res.status === 404) {
         return NextResponse.json({ language: 'en' });
       }
-      const err = (await res.json().catch(() => ({}))) as { message?: string };
+      const err = parseBackendError(await res.json().catch(() => ({})));
       return NextResponse.json(
         { message: err.message ?? 'Failed to get language preference' },
         { status: res.status },
       );
     }
 
-    const data = (await res.json()) as unknown;
+    const data = await parseBackendJson<unknown>(res);
     return NextResponse.json(data);
   } catch {
     // Backend not reachable — return default gracefully
@@ -74,7 +75,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     });
 
     if (!res.ok) {
-      const err = (await res.json().catch(() => ({}))) as { message?: string };
+      const err = parseBackendError(await res.json().catch(() => ({})));
       return NextResponse.json(
         { message: err.message ?? 'Failed to update language preference' },
         { status: res.status },

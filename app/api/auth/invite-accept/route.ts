@@ -3,6 +3,7 @@
  * Proxies POST /api/v1/auth/admin/invitations/accept
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { parseBackendError, parseBackendJson } from '@/lib/api/core/envelope';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
@@ -14,7 +15,11 @@ export async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    const data = await upstream.json().catch(() => ({}));
+    if (!upstream.ok) {
+      const err = parseBackendError(await upstream.json().catch(() => ({})));
+      return NextResponse.json(err, { status: upstream.status });
+    }
+    const data = await parseBackendJson<unknown>(upstream);
     return NextResponse.json(data, { status: upstream.status });
   } catch {
     return NextResponse.json({ message: 'Invite accept failed' }, { status: 500 });

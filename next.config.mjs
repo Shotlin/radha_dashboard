@@ -23,6 +23,11 @@ const csp = [
 
 const nextConfig = {
   reactStrictMode: true,
+  // Lean, self-contained production output (Phase 11 dashboard_deploy) --
+  // `.next/standalone` bundles only the traced dependencies a request
+  // actually needs, so the Docker image doesn't need to ship full
+  // node_modules.
+  output: 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
   },

@@ -20,7 +20,13 @@ export async function GET(req: NextRequest) {
   try {
     const data = await listSubmissions({ status, limit, offset });
     return NextResponse.json(data);
-  } catch {
-    return NextResponse.json({ data: [], total: 0, limit, offset }, { status: 200 });
+  } catch (err) {
+    // A real backend/network/validation failure must surface as an error,
+    // not a fabricated empty-but-successful queue — a 200 here previously
+    // made a broken backend indistinguishable from "nothing pending"
+    // (Phase 11 fix; discovered via the dashboard-wide envelope-unwrap bug
+    // this same phase also fixes).
+    const message = err instanceof Error ? err.message : 'Failed to load submissions';
+    return NextResponse.json({ message, code: 'SUBMISSIONS_QUEUE_ERROR' }, { status: 502 });
   }
 }

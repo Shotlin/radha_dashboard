@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setSession } from '@/lib/auth/session';
 import { DEMO_MODE, findDemoUser, buildDemoSession } from '@/lib/demo/demo-session';
+import { parseBackendError, parseBackendJson } from '@/lib/api/core/envelope';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
@@ -39,17 +40,15 @@ export async function POST(req: NextRequest) {
     });
 
     if (!upstream.ok) {
-      const err = (await upstream.json().catch(() => ({}))) as {
-        message?: string;
-        statusCode?: number;
-      };
+      const body = await upstream.json().catch(() => ({}));
+      const err = parseBackendError(body);
       return NextResponse.json(
         { message: err.message ?? 'Invalid credentials', code: 'AUTH_FAILED' },
         { status: upstream.status },
       );
     }
 
-    const data = (await upstream.json()) as {
+    const data = await parseBackendJson<{
       accessToken: string;
       refreshToken: string;
       expiresIn: number;
@@ -61,7 +60,7 @@ export async function POST(req: NextRequest) {
         storeIds: string[];
         permissions: string[];
       };
-    };
+    }>(upstream);
 
     await setSession({
       accessToken: data.accessToken,

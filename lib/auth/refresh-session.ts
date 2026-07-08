@@ -21,6 +21,7 @@
 import 'server-only';
 import { getSession, setSession, clearSession } from './session';
 import { refreshOnce } from './refresh-lock';
+import { parseBackendJson } from '@/lib/api/core/envelope';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
@@ -56,11 +57,11 @@ async function runRefresh(): Promise<RefreshOutcome> {
     // A non-2xx here means the refresh token was rejected — a HARD failure.
     if (!res.ok) return { ok: false, hard: true };
 
-    const data = (await res.json()) as {
+    const data = await parseBackendJson<{
       accessToken: string;
       refreshToken: string;
       expiresIn: number;
-    };
+    }>(res);
 
     await setSession({
       ...session,

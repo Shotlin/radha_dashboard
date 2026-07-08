@@ -14,6 +14,7 @@ import { getDemoDataset } from '@/lib/demo';
 import type { Role } from '@/lib/permissions';
 import type { StoreScope } from '@/lib/api/core/scope-types';
 import { isDemoRequest, throwIfNotOk, withBackendTimeout } from '@/lib/api/core/proxy';
+import { parseBackendJson } from '@/lib/api/core/envelope';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
@@ -64,7 +65,7 @@ export async function GET() {
         next: { revalidate: 0 },
       });
       await throwIfNotOk(r);
-      return (await r.json()) as { stores: Store[] };
+      return parseBackendJson<{ stores: Store[] }>(r);
     });
     return NextResponse.json(res, { status: 200 });
   } catch {

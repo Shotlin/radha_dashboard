@@ -36,6 +36,7 @@ import {
   RateLimitError,
   ResponseValidationError,
 } from './errors';
+import { parseBackendJson, parseBackendError } from './envelope';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
@@ -87,15 +88,20 @@ class TransientFetchError extends Error {
 
 /** Normalise a non-2xx response to an ApiRequestError. */
 async function normaliseError(res: Response, requestId: string): Promise<ApiRequestError> {
-  let body: Record<string, unknown> = {};
+  let body: unknown = {};
   try {
-    body = (await res.json()) as Record<string, unknown>;
+    body = await res.json();
   } catch {
     // Swallow — body may be empty
   }
-  const code = (body.code as string) || (body.error as string) || `HTTP_${res.status}`;
-  const message = (body.message as string) || res.statusText || 'An error occurred';
-  const fields = body.errors as Record<string, string> | undefined;
+  // Backend errors are enveloped as {success:false, error:{code,message,details}}
+  // — parseBackendError reads that shape, falling back to a flat body for
+  // anything upstream of the backend (e.g. an nginx/Cloudflare error page).
+  const parsed = parseBackendError(body);
+  const flatBody = (body ?? {}) as Record<string, unknown>;
+  const code = parsed.code || `HTTP_${res.status}`;
+  const message = parsed.message || res.statusText || 'An error occurred';
+  const fields = flatBody.errors as Record<string, string> | undefined;
 
   switch (res.status) {
     case 401:
@@ -202,10 +208,11 @@ export async function apiFetch<TSchema extends z.ZodTypeAny>(
       return schema.parse(undefined) as z.infer<TSchema>;
     }
 
-    // Parse JSON body
+    // Parse JSON body — unwrap the backend's {success,data,meta} envelope
+    // before validating against the caller's (flat) schema.
     let data: unknown;
     try {
-      data = await res.json();
+      data = await parseBackendJson<unknown>(res);
     } catch {
       throw new ResponseValidationError('Response body was not valid JSON');
     }
