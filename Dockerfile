@@ -26,10 +26,13 @@ FROM node:20-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 # .next/standalone already contains a minimal server.js + only the
-# node_modules the traced pages actually import.
+# node_modules the traced pages actually import. This repo has no
+# top-level public/ directory today (only app/icon.svg, which Next
+# already emits into .next/static as a route) -- if one is added later,
+# this COPY needs to be uncommented.
+# COPY --from=build /app/public ./public
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
-COPY --from=build /app/public ./public
 
 USER node
 EXPOSE 3000
